@@ -1,0 +1,36 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+# Task 1: Restore NuGet Packages
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+
+# Task 2: Compile the Application
+- task: DotNetCoreCLI@2
+  displayName: 'Compile Application'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration Release'
+
+# Task 3: Copy Files
+- task: CopyFiles@2
+  displayName: 'Copy Files'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/*'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# Task 4: Publish Artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
